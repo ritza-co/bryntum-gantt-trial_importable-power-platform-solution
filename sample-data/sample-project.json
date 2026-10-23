@@ -1,0 +1,22 @@
+{
+  "_comment": "Same project as BryntumGantt/sampleProject.ts, with fixed dates. parentKey links sub-tasks to their summary task. Dependencies are finish-to-start (Bryntum type 2).",
+  "tasks": [
+    { "key": "phase1",    "name": "Website redesign",  "startDate": "2026-11-02T08:00:00Z", "endDate": "2026-11-21T08:00:00Z", "duration": 19, "percentDone": 45,  "expanded": true,  "parentIndex": 0, "orderedParentIndex": 0 },
+    { "key": "research",  "parentKey": "phase1", "name": "Research",        "startDate": "2026-11-02T08:00:00Z", "endDate": "2026-11-07T08:00:00Z", "duration": 5,  "percentDone": 100, "parentIndex": 0, "orderedParentIndex": 0 },
+    { "key": "design",    "parentKey": "phase1", "name": "Design",          "startDate": "2026-11-09T08:00:00Z", "endDate": "2026-11-14T08:00:00Z", "duration": 5,  "percentDone": 60,  "parentIndex": 1, "orderedParentIndex": 1 },
+    { "key": "prototype", "parentKey": "phase1", "name": "Build prototype", "startDate": "2026-11-16T08:00:00Z", "endDate": "2026-11-21T08:00:00Z", "duration": 5,  "percentDone": 20,  "parentIndex": 2, "orderedParentIndex": 2 },
+    { "key": "review",    "parentKey": "phase1", "name": "Internal review", "startDate": "2026-11-23T08:00:00Z", "endDate": "2026-11-26T08:00:00Z", "duration": 3,  "percentDone": 0,   "parentIndex": 3, "orderedParentIndex": 3 },
+    { "key": "phase2",    "name": "Launch",            "startDate": "2026-11-26T08:00:00Z", "endDate": "2026-12-07T08:00:00Z", "duration": 10, "percentDone": 0,   "expanded": true,  "parentIndex": 1, "orderedParentIndex": 1 },
+    { "key": "docs",      "parentKey": "phase2", "name": "Documentation",   "startDate": "2026-11-26T08:00:00Z", "endDate": "2026-12-01T08:00:00Z", "duration": 5,  "percentDone": 0,   "parentIndex": 0, "orderedParentIndex": 0 },
+    { "key": "training",  "parentKey": "phase2", "name": "Customer training","startDate": "2026-11-30T08:00:00Z", "endDate": "2026-12-03T08:00:00Z", "duration": 3,  "percentDone": 0,   "parentIndex": 1, "orderedParentIndex": 1 },
+    { "key": "golive",    "parentKey": "phase2", "name": "Go live",         "startDate": "2026-12-07T08:00:00Z", "endDate": "2026-12-07T08:00:00Z", "duration": 0,  "percentDone": 0,   "parentIndex": 2, "orderedParentIndex": 2 }
+  ],
+  "dependencies": [
+    { "fromKey": "research",  "toKey": "design" },
+    { "fromKey": "design",    "toKey": "prototype" },
+    { "fromKey": "prototype", "toKey": "review" },
+    { "fromKey": "review",    "toKey": "docs" },
+    { "fromKey": "docs",      "toKey": "training" },
+    { "fromKey": "training",  "toKey": "golive" }
+  ]
+}

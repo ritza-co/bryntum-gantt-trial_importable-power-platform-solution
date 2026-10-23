@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="Bryntum" constructor="Gantt" version="1.0.1" display-name-key="Bryntum Gantt" description-key="Bryntum Gantt (trial) backed by the Bryntum Gantt Task and Bryntum Gantt Dependency Dataverse tables." control-type="virtual">
+    <!-- No external services: Bryntum, FontAwesome and the fonts are all bundled, so the
+         component is not flagged as premium. -->
+    <external-service-usage enabled="false">
+    </external-service-usage>
+
+    <!-- A virtual (React) code component needs at least one bound property. The Gantt does
+         not use it; bind it to any text column or leave it as is. -->
+    <property name="ganttProperty" display-name-key="Gantt property (unused)" description-key="Required placeholder property. The Gantt reads its data from Dataverse through the Web API, not from this property." of-type="SingleLine.Text" usage="bound" required="false" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <platform-library name="React" version="16.8.6" />
+      <css path="css/fontawesome.css" order="1" />
+      <css path="css/solid.css" order="2" />
+      <css path="css/gantt.css" order="3" />
+      <css path="css/svalbard-light.css" order="4" />
+      <css path="css/BryntumGanttComponent.css" order="5" />
+    </resources>
+
+    <feature-usage>
+      <uses-feature name="WebAPI" required="true" />
+      <uses-feature name="Utility" required="true" />
+    </feature-usage>
+  </control>
+</manifest>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="bryntum_BryntumGanttTask_Dependency_From" />
+  <EntityRelationship Name="bryntum_BryntumGanttTask_Dependency_To" />
+  <EntityRelationship Name="business_unit_bryntum_bryntumganttdependency" />
+  <EntityRelationship Name="business_unit_bryntum_bryntumgantttask" />
+  <EntityRelationship Name="lk_bryntum_bryntumganttdependency_createdby" />
+  <EntityRelationship Name="lk_bryntum_bryntumganttdependency_modifiedby" />
+  <EntityRelationship Name="lk_bryntum_bryntumgantttask_createdby" />
+  <EntityRelationship Name="lk_bryntum_bryntumgantttask_modifiedby" />
+  <EntityRelationship Name="owner_bryntum_bryntumganttdependency" />
+  <EntityRelationship Name="owner_bryntum_bryntumgantttask" />
+  <EntityRelationship Name="team_bryntum_bryntumganttdependency" />
+  <EntityRelationship Name="team_bryntum_bryntumgantttask" />
+  <EntityRelationship Name="user_bryntum_bryntumganttdependency" />
+  <EntityRelationship Name="user_bryntum_bryntumgantttask" />
+</EntityRelationships>

@@ -1,0 +1,10 @@
+Name,Start date,End date,Duration,Duration unit,Percent done,Expanded,Manually scheduled,Parent task id,Parent index,Ordered parent index
+Website redesign,2026-11-02,2026-11-21,19,day,45,1,0,,0,0
+Research,2026-11-02,2026-11-07,5,day,100,0,0,<id of Website redesign>,0,0
+Design,2026-11-09,2026-11-14,5,day,60,0,0,<id of Website redesign>,1,1
+Build prototype,2026-11-16,2026-11-21,5,day,20,0,0,<id of Website redesign>,2,2
+Internal review,2026-11-23,2026-11-26,3,day,0,0,0,<id of Website redesign>,3,3
+Launch,2026-11-26,2026-12-07,10,day,0,1,0,,1,1
+Documentation,2026-11-26,2026-12-01,5,day,0,0,0,<id of Launch>,0,0
+Customer training,2026-11-30,2026-12-03,3,day,0,0,0,<id of Launch>,1,1
+Go live,2026-12-07,2026-12-07,0,day,0,0,0,<id of Launch>,2,2

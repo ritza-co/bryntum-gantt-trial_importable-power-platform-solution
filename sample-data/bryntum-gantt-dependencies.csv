@@ -1,0 +1,7 @@
+Name,Type,Lag,Lag unit,Active,From side,To side,From task,To task
+Research → Design,2,0,day,1,end,start,Research,Design
+Design → Build prototype,2,0,day,1,end,start,Design,Build prototype
+Build prototype → Internal review,2,0,day,1,end,start,Build prototype,Internal review
+Internal review → Documentation,2,0,day,1,end,start,Internal review,Documentation
+Documentation → Customer training,2,0,day,1,end,start,Documentation,Customer training
+Customer training → Go live,2,0,day,1,end,start,Customer training,Go live
