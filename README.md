@@ -24,50 +24,79 @@ Known Power Apps quirks handled in this project:
 - **Promise replacement.** Canvas apps and custom pages replace the page's global `Promise` with a WinJS implementation. Promises Bryntum creates with `new Promise` then fail inside the task editor (`this._state.then is not a function`, see the forum thread t=35643). `webpack.config.js` binds the `Promise` identifier in the bundle to the browser's native constructor; `featureconfig.json` turns that custom config on. `pcfconfig.json` also targets current browsers so Babel leaves Bryntum's `async` functions native. Both are needed.
 - **z-index flattening.** Power Apps flattens Bryntum's dynamic z-index, so `BryntumGantt/css/BryntumGanttComponent.css` pins the task editor, its pickers and the delete confirmation dialog in a fixed order.
 
-## Build the control
+## What you need
+
+- Node.js 20 or newer and npm.
+- .NET SDK 8 or newer (`dotnet`), which also restores the Power Apps MSBuild packages.
+- Power Platform CLI, only for the Dataverse steps: `dotnet tool install --global Microsoft.PowerApps.CLI.Tool` (puts `pac` in `~/.dotnet/tools`).
+- For the Dataverse steps: a Dataverse environment where you have the System Administrator or System Customizer role. A free developer environment from the Power Apps Developer Plan is enough.
+
+## Build the zips from source (no Dataverse needed)
+
+`solution/src` holds the two table definitions exported from Dataverse, and the solution project references the control, so one command rebuilds both zips:
+
+```sh
+cd bryntum-gantt-pcf && npm install && cd ..
+bash scripts/build-solution.sh
+```
+
+Output: `solution/bin/Release/BryntumGanttTrial_managed.zip` and `solution/bin/Release/BryntumGanttTrial.zip` (unmanaged). The script deletes `bryntum-gantt-pcf/out` first because MSBuild packs whatever bundle is there, and `npm start` leaves a development bundle behind.
+
+To change the version, edit `<Version>` in `solution/src/Other/Solution.xml` and `version` in `bryntum-gantt-pcf/BryntumGantt/ControlManifest.Input.xml`. Power Apps only picks up a new control build when the control version changes.
+
+**Bundle size.** Dataverse rejects web resources over 5 MiB (5,242,880 bytes). The trial build of Bryntum Gantt is obfuscated and minifies to 5,142,218 bytes (4.90 MiB), about 100 KB under, and only when `pcfconfig.json` targets current browsers (Chrome, Edge and Firefox 120, Safari 17), which is what Power Apps supports anyway. With the default pcf-scripts targets Babel rewrites parts of the bundle and it lands 4.6 KB over the limit. Keep the targets as they are, and check the size after any Bryntum upgrade: `pcf-scripts` fails the build with `pcf-1045` when it is too big. (The thin trial packages were measured too, 5,585,441 bytes, so they do not help here. Licensed builds are about 3.9 MiB.)
+
+## Work on the control
 
 ```sh
 cd bryntum-gantt-pcf
 npm install            # trial packages come from the public npm registry (see .npmrc)
 npm run copy-css       # refresh BryntumGantt/css from node_modules after a Bryntum upgrade
 npm run build:release  # production bundle in out/controls/BryntumGantt
+npm start              # Microsoft test harness with the read-only sample (development build)
 ```
 
-**Bundle size.** Dataverse rejects web resources over 5 MiB (5,242,880 bytes). The trial build of Bryntum Gantt is obfuscated and minifies to 5,142,218 bytes (4.90 MiB), about 100 KB under, and only when `pcfconfig.json` targets current browsers (Chrome, Edge and Firefox 120, Safari 17), which is what Power Apps supports anyway. With the default pcf-scripts targets Babel rewrites parts of the bundle and it lands 4.6 KB over the limit. Keep the targets as they are, and check the size after any Bryntum upgrade: `pcf-scripts` fails the build with `pcf-1045` when it is too big. (The thin trial packages were measured too, 5,585,441 bytes, so they do not help here. Licensed builds are about 3.9 MiB.)
+The harness pops up two alerts saying retrieving records "is not yet supported"; dismiss them, the component then shows the sample. For a mocked Web API use PCF Workbench (`npx @pcfworkbench/cli start` from `code/`), which serves `bryntum-gantt-pcf/data.json`.
 
-Local preview without a tenant: `npm start` opens the Microsoft test harness with the read-only sample (development build). The harness itself pops up two alerts saying retrieving records "is not yet supported"; dismiss them, the component then shows the sample. For a mocked Web API use PCF Workbench (`npx @pcfworkbench/cli start` from `code/`), which serves `bryntum-gantt-pcf/data.json`.
-
-## Produce the solution zips
-
-The tables are Dataverse metadata, so they are created once in a build environment and exported with the control. Everything after sign-in is scripted.
+To try a change against real Dataverse without rebuilding the zips, push the control straight into a build environment that already has the solution:
 
 ```sh
-# 0. One-time sign-in for the Power Platform CLI
-pac auth create --environment https://<build-org>.crm4.dynamics.com
+pac auth create --environment https://<build-org>.crm4.dynamics.com   # once
+bash scripts/push-pcf.sh https://<build-org>.crm4.dynamics.com
+```
 
-# 1. Publisher "Bryntum" (prefix bryntum), solution BryntumGanttTrial, both tables, lookups, sample rows
+Then remove and re-add the component on the page and republish; Power Apps caches the old version otherwise.
+
+## Change the tables (needs Dataverse)
+
+The tables are Dataverse metadata, so edit them in an environment and re-export rather than by hand in XML:
+
+```sh
+# 1. Publisher "Bryntum" (prefix bryntum), solution BryntumGanttTrial, both tables, lookups, sample rows.
+#    Idempotent; re-run after adding columns to the script.
 node scripts/provision-dataverse.mjs --url https://<build-org>.crm4.dynamics.com --seed
 
 # 2. Push the control into that solution
 bash scripts/push-pcf.sh https://<build-org>.crm4.dynamics.com
 
-# 3. Export managed + unmanaged zips to dist/
-bash scripts/export-solution.sh https://<build-org>.crm4.dynamics.com 1.0.0.1
+# 3. Export managed + unmanaged zips to dist/ (also usable as the deliverable directly)
+bash scripts/export-solution.sh https://<build-org>.crm4.dynamics.com 1.0.0.2
 
-# 4. (optional) pull the table definitions into solution/src so `dotnet build` rebuilds the whole zip offline
+# 4. Pull the table definitions back into solution/src so the offline build stays in sync
 bash scripts/sync-solution-source.sh
-bash scripts/build-solution.sh
 ```
 
-Use `bash scripts/build-solution.sh` rather than a bare `dotnet build`: it deletes `bryntum-gantt-pcf/out` first, because MSBuild packs whatever bundle is there and `npm start` leaves a 7.5 MB development bundle behind. Without step 4, the zips contain only the control. That is still useful for pushing a new control version into an environment that already has the tables.
+Column names the component reads and writes are in `bryntum-gantt-pcf/BryntumGantt/constants.ts` and the `taskToRow` / `rowToTask` functions in `BryntumGanttComponent.tsx`; the provisioning script's column list must match them.
 
 ## Test the import on a clean environment
+
+Use an environment that has never had the solution, otherwise the import proves nothing:
 
 ```sh
 bash scripts/import-to-test-env.sh https://<clean-test-org>.crm4.dynamics.com
 ```
 
-Then follow `short-import-guide.md` (the guide the customer's admin gets) from step 2 onward and check that the Gantt renders, the sample loads, and a dragged task keeps its new dates after a page refresh.
+Then follow `short-import-guide.md` (the guide the customer's admin gets) from step 2 onward and check that the Gantt renders, the sample loads, and a dragged task keeps its new dates after a page refresh. To remove it afterwards, delete the test app's site map and custom page from the Default Solution first, then the solution (guide section 8).
 
 ## Changing the target tables
 

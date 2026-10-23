@@ -11,4 +11,6 @@ ZIP="$ROOT/dist/BryntumGanttTrial_unmanaged.zip"
 pac solution unpack --zipfile "$ZIP" --folder "$ROOT/solution/src" --packagetype Unmanaged --allowDelete --allowWrite 2>&1 | cat
 # The control itself is built from source by the cdsproj reference, so drop the exported copy.
 rm -rf "$ROOT/solution/src/Controls"
+# The export is unmanaged (<Managed>0</Managed>); the project packs both types, which needs 2.
+sed -i '' 's#<Managed>[0-9]</Managed>#<Managed>2</Managed>#' "$ROOT/solution/src/Other/Solution.xml"
 echo "solution/src now contains:"; find "$ROOT/solution/src" -maxdepth 2 | sort
