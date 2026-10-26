@@ -1,0 +1,37 @@
+
+/*
+ * In Power Apps, size the control from the PCF host allocation instead of
+ * the browser viewport. Viewport sizing shifts Bryntum's floating menus and
+ * dialogs when the app shell/navigation takes space around the custom page.
+ */
+.bryntum-taskboard-pcf-root {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bryntum-taskboard-pcf-root .b-task-board {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/*
+ * Power Apps (model-driven app pages and custom pages) ships a page-level CSS rule that forces
+ * `z-index: 0 !important` on any element with an `aria-modal` attribute. Bryntum's modal popups
+ * (task editor, message dialogs) carry aria-modal="true" while their modal mask does not, so the
+ * mask (--b-modal-mask-z-index: 1) paints over the editor and the form looks greyed out
+ * (bryntum-suite #14486, Task Board part). Measured 26 Oct 2026: the editor computed z-index is 0
+ * in Power Apps and 1 in the PCF harness with identical Bryntum CSS, and a probe element with only
+ * the aria-modal attribute gets z-index 0. This rule has higher specificity than the host's and
+ * restores Bryntum's own value, so mask, popup and pickers stack by DOM order again.
+ * No other z-index overrides are needed.
+ */
+.b-float-root > .b-floating[aria-modal] {
+    z-index: var(--b-floating-z-index, 1) !important;
+}

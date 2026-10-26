@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="Bryntum" constructor="Gantt" version="1.0.1" display-name-key="Bryntum Gantt" description-key="Bryntum Gantt (trial) backed by the Bryntum Gantt Task and Bryntum Gantt Dependency Dataverse tables." control-type="virtual">
+  <control namespace="Bryntum" constructor="Gantt" version="1.0.6" display-name-key="Bryntum Gantt" description-key="Bryntum Gantt (trial) backed by the Bryntum Gantt Task and Bryntum Gantt Dependency Dataverse tables." control-type="virtual">
     <!-- No external services: Bryntum, FontAwesome and the fonts are all bundled, so the
          component is not flagged as premium. -->
     <external-service-usage enabled="false">

@@ -34,41 +34,15 @@
     padding: 0 0.5em;
 }
 
-/* In Power Apps, the task editor's Delete button opens Bryntum's shared MessageDialog
-   while the task editor is still modal. Power Apps flattens Bryntum's dynamic z-index
-   stacking, so pin the confirmation dialog and its mask above the open editor. */
-.b-float-root > .b-modal-mask[owned-by^="b-messagedialog"],
-.b-float-root > .b-modal-mask[owned-by*=" b-messagedialog"],
-.b-float-root > .b-modal-mask[owned-by*="-messagedialog"] {
-    z-index: 2147483000 !important;
-}
-
-.b-float-root > .b-message-dialog.b-floating,
-.b-float-root > .b-message-dialog.b-positioned,
-.b-float-root > [id^="b-messagedialog"].b-floating,
-.b-float-root > [id^="b-messagedialog"].b-positioned {
-    z-index: 2147483001 !important;
-}
-
-/* Same treatment for the task editor and the pickers it opens. */
-.b-float-root > .b-modal-mask[owned-by^="b-taskeditor"],
-.b-float-root > .b-modal-mask[owned-by*=" b-taskeditor"],
-.b-float-root > .b-modal-mask[owned-by*="-taskeditor"] {
-    z-index: 2147482000 !important;
-}
-
-.b-float-root > .b-gantttaskeditor.b-floating,
-.b-float-root > .b-gantttaskeditor.b-positioned,
-.b-float-root > [id^="b-gantttaskeditor"].b-floating,
-.b-float-root > [id^="b-gantttaskeditor"].b-positioned {
-    z-index: 2147482001 !important;
-}
-
-.b-float-root > .b-combo-picker.b-floating,
-.b-float-root > .b-datepicker.b-floating,
-.b-float-root > .b-timepicker.b-floating,
-.b-float-root > [id^="b-list"].b-floating {
-    z-index: 2147482010 !important;
+/*
+ * Power Apps page CSS forces `z-index: 0 !important` on any element with an `aria-modal`
+ * attribute. Bryntum's modal popups (delete confirmation, message dialogs) carry
+ * aria-modal="true" while their modal mask does not, so without this rule the mask paints
+ * over the dialog. Restoring Bryntum's own value lets mask and popup stack by DOM order again
+ * (bryntum-suite #14486, measured 26 Oct 2026).
+ */
+.b-float-root > .b-floating[aria-modal] {
+    z-index: var(--b-floating-z-index, 1) !important;
 }
 
 /* Loading and error states */

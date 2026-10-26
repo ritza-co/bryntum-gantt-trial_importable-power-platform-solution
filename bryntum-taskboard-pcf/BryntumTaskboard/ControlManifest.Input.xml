@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="Bryntum" constructor="TaskBoard" version="1.0.2" display-name-key="Bryntum Task Board (test)" description-key="Bryntum Task Board (trial) test control for the floating UI stacking issue in custom pages." control-type="virtual" >
+    <external-service-usage enabled="false">
+    </external-service-usage>
+    <property name="sampleProperty" display-name-key="Property_Display_Key" description-key="Property_Desc_Key" of-type="SingleLine.Text" usage="bound" required="false" />
+    <resources>
+      <code path="index.ts" order="1"/>
+      <platform-library name="React" version="16.8.6" />
+      <css path="css/fontawesome.css" order="1" />
+      <css path="css/solid.css" order="2" />
+      <css path="css/taskboard.css" order="3" />
+      <css path="css/svalbard-light.css" order="4" />
+      <css path="css/BryntumTaskboardComponent.css" order="5" />
+    </resources>
+    <feature-usage>
+      <uses-feature name="WebAPI" required="true" />
+    </feature-usage>
+  </control>
+</manifest>

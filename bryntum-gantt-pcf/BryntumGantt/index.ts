@@ -16,16 +16,10 @@ export class Gantt implements ComponentFramework.ReactControl<IInputs, IOutputs>
         // Ask the host for allocatedWidth/allocatedHeight so the Gantt can fill its container.
         context.mode.trackContainerResize(true);
 
-        // Bryntum expects `globalThis`. Some Power Apps hosts do not expose it.
-        const w = window as unknown as { globalThis?: unknown };
-        if (w.globalThis !== window) {
-            try {
-                Object.defineProperty(window, 'globalThis', { value : window, writable : false });
-            }
-            catch {
-                // Read-only host property; Bryntum falls back to window.
-            }
-        }
+        // Note: custom pages evaluate this bundle in a wrapper scope where the bare identifier
+        // `globalThis` is a Power Apps context object, not the window. That is handled at build
+        // time by webpack.config.js (ProvidePlugin), not here: the `window.globalThis` property
+        // is untouched by the host, so a runtime check on it never fires.
     }
 
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {

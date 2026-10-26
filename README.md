@@ -3,10 +3,11 @@
 A Bryntum Gantt 7.3.7 trial build wrapped as a Power Apps component framework (PCF) code component, plus the two Dataverse tables it reads and writes, packaged as a solution zip that an admin can import without any developer tooling.
 
 ```
-code/
+.
 ├── bryntum-gantt-pcf/      PCF project (React, Bryntum Gantt trial, Dataverse Web API CRUD)
+├── bryntum-taskboard-pcf/  PCF test control (React, Bryntum Task Board trial), see below
 ├── solution/               Solution project: `dotnet build -c Release` → managed + unmanaged zips
-├── scripts/                Provision tables, push the control, export/import, sync solution source
+├── scripts/                Provision tables, push the controls, export/import, sync solution source
 ├── sample-data/            Sample project as JSON and CSV
 └── dist/                   Exported zips (created by scripts/export-solution.sh; not in git)
 ```
@@ -19,10 +20,13 @@ code/
 - Hosts without the Dataverse Web API (canvas apps, the local test harness): the component renders the same sample read-only and says so. The Web API is only available in model-driven apps and custom pages, so that is where live data works.
 - No external requests: Bryntum, FontAwesome (font inlined) and the Svalbard theme are bundled, so the component is not flagged as premium.
 
+This version (solution 1.0.0.3, control 1.0.6) includes the fixes for [bryntum-suite#14486](https://github.com/bryntum/bryntum-suite/issues/14486): the context menu at the top-left corner and modal popups under their mask. The investigation and the Task Board test control are in the companion repo https://github.com/ritza-co/bryntum-pcf_gantt-and-taskboard_UI-fixes.
+
 Known Power Apps quirks handled in this project:
 
 - **Promise replacement.** Canvas apps and custom pages replace the page's global `Promise` with a WinJS implementation. Promises Bryntum creates with `new Promise` then fail inside the task editor (`this._state.then is not a function`, see the forum thread t=35643). `webpack.config.js` binds the `Promise` identifier in the bundle to the browser's native constructor; `featureconfig.json` turns that custom config on. `pcfconfig.json` also targets current browsers so Babel leaves Bryntum's `async` functions native. Both are needed.
-- **z-index flattening.** Power Apps flattens Bryntum's dynamic z-index, so `BryntumGantt/css/BryntumGanttComponent.css` pins the task editor, its pickers and the delete confirmation dialog in a fixed order.
+- **`globalThis` replacement.** Custom pages and canvas apps evaluate the bundle inside a wrapper scope (DevTools shows it as `wrapped.powerapps/appruntime/...`). Inside it, `window` and `self` are a Power Apps container object, and `globalThis` is the real window while the bundle loads but the container afterwards; globals the bundle adds during load are moved into the container. Bryntum detects the viewport with `constrainTo === globalThis` (`Rectangle.alignTo`) and its context menus capture `globalThis` in their config at load, so the comparison later fails, `DomHelper.getStyleValue(window)` throws `Cannot read properties of undefined (reading 'defaultView')`, and the menu is left at the top-left corner (bryntum-suite issue 14486). `webpack.config.js` also binds `globalThis` in the bundle to one stable object: `BryntumGantt/realGlobal.js` picks `window` when it is a usable global-like object (the container in Power Apps, the real window elsewhere), falling back to the window reached through the DOM. A runtime check of the `window.globalThis` property cannot catch this, because the host never changes that property.
+- **Modal popups under their mask.** Power Apps page CSS forces `z-index: 0 !important` on any element with an `aria-modal` attribute, which Bryntum's modal popups carry and their modal mask does not. One rule in `BryntumGantt/css/BryntumGanttComponent.css` (`.b-float-root > .b-floating[aria-modal]`) restores Bryntum's own z-index so mask, popup and pickers stack by DOM order again. No other z-index overrides are needed.
 
 ## What you need
 
@@ -56,7 +60,7 @@ npm run build:release  # production bundle in out/controls/BryntumGantt
 npm start              # Microsoft test harness with the read-only sample (development build)
 ```
 
-The harness pops up two alerts saying retrieving records "is not yet supported"; dismiss them, the component then shows the sample. For a mocked Web API use PCF Workbench (`npx @pcfworkbench/cli start` from `code/`), which serves `bryntum-gantt-pcf/data.json`.
+The harness pops up two alerts saying retrieving records "is not yet supported"; dismiss them, the component then shows the sample. For a mocked Web API use PCF Workbench (`npx @pcfworkbench/cli start` from the repo root), which serves `bryntum-gantt-pcf/data.json`.
 
 To try a change against real Dataverse without rebuilding the zips, push the control straight into a build environment that already has the solution:
 
@@ -80,7 +84,7 @@ node scripts/provision-dataverse.mjs --url https://<build-org>.crm4.dynamics.com
 bash scripts/push-pcf.sh https://<build-org>.crm4.dynamics.com
 
 # 3. Export managed + unmanaged zips to dist/ (also usable as the deliverable directly)
-bash scripts/export-solution.sh https://<build-org>.crm4.dynamics.com 1.0.0.2
+bash scripts/export-solution.sh https://<build-org>.crm4.dynamics.com 1.0.0.3
 
 # 4. Pull the table definitions back into solution/src so the offline build stays in sync
 bash scripts/sync-solution-source.sh
@@ -97,6 +101,18 @@ bash scripts/import-to-test-env.sh https://<clean-test-org>.crm4.dynamics.com
 ```
 
 Then follow `short-import-guide.md` (the guide the customer's admin gets) from step 2 onward and check that the Gantt renders, the sample loads, and a dragged task keeps its new dates after a page refresh. To remove it afterwards, delete the test app's site map and custom page from the Default Solution first, then the solution (guide section 8).
+
+## Task Board test control (`bryntum-taskboard-pcf`)
+
+A second control, `Bryntum.TaskBoard`, built the same way (Task Board 7.3.7 trial, React platform library, the two webpack bindings, no external services). It exists to reproduce and verify the floating-UI problems reported in [bryntum-suite#14486](https://github.com/bryntum/bryntum-suite/issues/14486) in a custom page: the task editor under its modal mask and the dropdowns it opens. It reads the `cr8a7_bryntumtaskboardtasks`, `...resources` and `...assignments` tables if they exist and falls back to built-in sample data otherwise, so the editor can always be opened. It is not part of the `BryntumGanttTrial` solution.
+
+```bash
+cd bryntum-taskboard-pcf && npm install && node ../scripts/copy-bryntum-taskboard-css.mjs
+npm run build:release
+pac pcf push --publisher-prefix bryntum --environment https://<build-org>.crm4.dynamics.com
+```
+
+The fixes it carries are the same two as the Gantt control (see "How the component works" above): the `globalThis` binding in `webpack.config.js` and the `.b-float-root > .b-floating[aria-modal]` rule in its CSS.
 
 ## Changing the target tables
 

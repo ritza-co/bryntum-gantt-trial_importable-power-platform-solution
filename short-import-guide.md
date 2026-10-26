@@ -89,9 +89,12 @@ Dependencies live in **Bryntum Gantt Dependency**: set **From task** and **To ta
 - **Model-driven apps and custom pages only for live data.** The component uses the Power Apps Web API to read and write Dataverse, and Microsoft does not provide that API to canvas apps. In a canvas app the component still renders, with a sample project and a "read-only" notice. If you need the Gantt in a canvas app with live data, tell us: that is a different, dataset-bound build.
 - **Its own two tables.** The Gantt reads and writes *Bryntum Gantt Task* and *Bryntum Gantt Dependency*. Connecting it to your existing tables is a follow-up that needs a small change to the component.
 - **Tasks and dependencies only.** Resources, assignments, calendars and baselines are not stored in this version, so those Gantt features show no data.
-- **Right-click menu position.** In a model-driven app custom page the task context menu opens in the top-left corner of the page instead of at the cursor. It still works from there. The toolbar and the task editor (double-click a task) cover the same actions. We have an open GitHub issue for this: https://github.com/bryntum/bryntum-suite/issues/14486
 - **One user at a time.** Changes save immediately, but another user's changes appear only after a page refresh.
 
 ## 8. Removing the trial
 
 First delete any app or page that uses the component (they depend on the solution): **Apps**, then the **...** menu of the model-driven app and of the custom page, **Delete**. Then **Solutions**, select **Bryntum Gantt (trial)**, **Delete**. Because it is a managed solution, this removes the component, the tables and their data in one step. If Dataverse still reports "Solution dependencies exist", select the solution and choose **Show dependencies** to see what is left. Leftovers from a deleted model-driven app live in **Solutions**, **Default Solution**, **Objects**: delete the app's **Site map** first, then the custom page (filter by **Pages**), then the solution.
+
+## Source code
+
+The component, the table definitions and the build scripts for this solution are at https://github.com/ritza-co/bryntum-gantt-trial_importable-power-platform-solution.
